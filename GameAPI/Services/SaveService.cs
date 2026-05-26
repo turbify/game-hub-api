@@ -32,7 +32,7 @@ namespace GameAPI.Services
 
             if (existingSave != null)
             {
-                // Aktualizuj istniejący zapis
+                // update existing save if it exists
                 existingSave.SaveData = request.SaveData;
                 existingSave.CurrentLevel = request.CurrentLevel;
                 existingSave.CurrentScore = request.CurrentScore;
@@ -43,7 +43,7 @@ namespace GameAPI.Services
                 return MapToResponse(existingSave);
             }
 
-            // Utwórz nowy zapis
+            // create new save if it doesn't exist
             var save = new GameSave
             {
                 UserId = userId,

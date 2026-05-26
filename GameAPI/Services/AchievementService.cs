@@ -14,7 +14,7 @@ namespace GameAPI.Services
             _context = context;
         }
 
-        // Lista wszystkich achievementów w grze
+        // list of all achievements in the system
         public async Task<List<AchievementResponse>> GetAllAchievementsAsync()
         {
             return await _context.Achievements
@@ -30,7 +30,7 @@ namespace GameAPI.Services
                 .ToListAsync();
         }
 
-        // Achievementy odblokowane przez gracza
+        // achievements unlocked by a specific user
         public async Task<List<UserAchievementResponse>> GetUserAchievementsAsync(int userId)
         {
             return await _context.UserAchievements
@@ -49,24 +49,24 @@ namespace GameAPI.Services
                 .ToListAsync();
         }
 
-        // Odblokuj achievement dla gracza
+        // unlock an achievement for a user
         public async Task<UserAchievementResponse?> UnlockAchievementAsync(int userId, string achievementKey)
         {
-            // Znajdź achievement po kluczu
+            // find achievement by key
             var achievement = await _context.Achievements
                 .FirstOrDefaultAsync(a => a.Key == achievementKey);
 
             if (achievement == null)
                 return null;
 
-            // Sprawdź czy gracz już go ma
+            // check if already unlocked
             bool alreadyUnlocked = await _context.UserAchievements
                 .AnyAsync(ua => ua.UserId == userId && ua.AchievementId == achievement.Id);
 
             if (alreadyUnlocked)
                 return null;
 
-            // Odblokuj
+            // unlock achievement
             var userAchievement = new UserAchievement
             {
                 UserId = userId,
@@ -88,10 +88,10 @@ namespace GameAPI.Services
             };
         }
 
-        // Utwórz achievement (admin)
+        // create a new achievement (Admin only)
         public async Task<AchievementResponse?> CreateAchievementAsync(CreateAchievementRequest request)
         {
-            // Sprawdź czy achievement z tym kluczem już istnieje
+            // check if achievement with the same key already exists
             bool exists = await _context.Achievements
                 .AnyAsync(a => a.Key == request.Key);
 

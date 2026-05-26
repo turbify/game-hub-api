@@ -17,7 +17,7 @@ namespace GameAPI.Controllers
             _achievementService = achievementService;
         }
 
-        // Publiczny – wszyscy mogą zobaczyć listę achievementów
+        // Public achievement list
         [HttpGet]
         public async Task<IActionResult> GetAllAchievements()
         {
@@ -25,7 +25,7 @@ namespace GameAPI.Controllers
             return Ok(achievements);
         }
 
-        // Chroniony – achievementy zalogowanego gracza
+        // Secured achievement list for user
         [HttpGet("my")]
         [Authorize]
         public async Task<IActionResult> GetMyAchievements()
@@ -35,7 +35,7 @@ namespace GameAPI.Controllers
             return Ok(achievements);
         }
 
-        // Chroniony – odblokuj achievement (wywołuje gra)
+        // Secured achievement unlock
         [HttpPost("unlock/{achievementKey}")]
         [Authorize]
         public async Task<IActionResult> UnlockAchievement(string achievementKey)
@@ -49,7 +49,7 @@ namespace GameAPI.Controllers
             return Ok(result);
         }
 
-        // Chroniony – utwórz achievement
+        // Secured achievement creation (Admin only)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAchievement(CreateAchievementRequest request)

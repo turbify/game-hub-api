@@ -4,33 +4,38 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Kontrolery
+// controllers 
 builder.Services.AddControllers();
 
-// Entity Framework – podłączamy bazę danych
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// entity Framework - database connection
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Auth
+// auth
 builder.Services.AddScoped<AuthService>();
 
-// Leaderboard
+// leaderboard
 builder.Services.AddScoped<LeaderboardService>();
 
-//Inventoyr
+// inventoyr
 builder.Services.AddScoped<InventoryService>();
 
-//Save
+// save
 builder.Services.AddScoped<SaveService>();
 
-//Achievements
+// achievements
 builder.Services.AddScoped<AchievementService>();
 
-// JWT Authentication
+// JWT authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"]!;
 
@@ -53,7 +58,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Swagger
+// swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

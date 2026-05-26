@@ -7,7 +7,7 @@ namespace GameAPI.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        // Każda właściwość DbSet = jedna tabela w bazie
+        // every DbSet corresponds to a table in the database
         public DbSet<User> Users { get; set; }
         public DbSet<LeaderboardEntry> LeaderboardEntries { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
@@ -19,7 +19,7 @@ namespace GameAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // USER – unikalny username i email
+            // user - unique username and email, required fields
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(u => u.Username).IsUnique();
@@ -29,7 +29,7 @@ namespace GameAPI.Data
                 entity.Property(u => u.PasswordHash).IsRequired();
             });
 
-            // LEADERBOARD – jeden user może mieć wiele wpisów
+            // leaderboard entry - every entry belongs to one user, cascade delete
             modelBuilder.Entity<LeaderboardEntry>(entity =>
             {
                 entity.HasOne(l => l.User)
@@ -38,7 +38,7 @@ namespace GameAPI.Data
                       .OnDelete(DeleteBehavior.Cascade); // usuń wpisy gdy user usunięty
             });
 
-            // INVENTORY – jeden user może mieć wiele przedmiotów
+            // inventory item - every item belongs to one user, cascade delete
             modelBuilder.Entity<InventoryItem>(entity =>
             {
                 entity.HasOne(i => i.User)
@@ -49,7 +49,7 @@ namespace GameAPI.Data
                 entity.Property(i => i.ItemKey).HasMaxLength(100).IsRequired();
             });
 
-            // ACHIEVEMENT – globalne definicje achievementów
+            // achievement - unique key, required name
             modelBuilder.Entity<Achievement>(entity =>
             {
                 entity.HasIndex(a => a.Key).IsUnique();
@@ -57,7 +57,7 @@ namespace GameAPI.Data
                 entity.Property(a => a.Name).HasMaxLength(200).IsRequired();
             });
 
-            // USER ACHIEVEMENT – tabela łącząca user <-> achievement
+            // user achievement - many-to-many between user and achievement, cascade delete, unique constraint on (UserId, AchievementId)
             modelBuilder.Entity<UserAchievement>(entity =>
             {
                 entity.HasOne(ua => ua.User)
@@ -70,11 +70,11 @@ namespace GameAPI.Data
                       .HasForeignKey(ua => ua.AchievementId)
                       .OnDelete(DeleteBehavior.Cascade);
 
-                // Ten sam achievement nie może być odblokowany dwa razy
+                // Same achievement cannot be unlocked multiple times by the same user
                 entity.HasIndex(ua => new { ua.UserId, ua.AchievementId }).IsUnique();
             });
 
-            // GAME SAVE – jeden user = jeden zapis
+            // game save - one-to-one with user, cascade delete
             modelBuilder.Entity<GameSave>(entity =>
             {
                 entity.HasOne(gs => gs.User)

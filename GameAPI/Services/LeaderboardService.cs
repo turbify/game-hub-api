@@ -22,7 +22,7 @@ namespace GameAPI.Services
                 .Take(count)
                 .ToListAsync();
 
-            // Mapujemy na DTO i dodajemy rank
+            // DTO mapping and rank calculation
             return entries.Select((entry, index) => new LeaderboardEntryResponse
             {
                 Rank = index + 1,
@@ -70,7 +70,7 @@ namespace GameAPI.Services
 
             return new LeaderboardEntryResponse
             {
-                Rank = 0, // policzymy osobno jeśli potrzeba
+                Rank = 0, // will be calculated when fetching top scores
                 Username = user!.Username,
                 Score = entry.Score,
                 Level = entry.Level,

@@ -22,7 +22,7 @@ namespace GameAPI.Services
 
         public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
         {
-            // Sprawdź czy username lub email już istnieje
+            // check if username or email already exists
             bool userExists = await _context.Users.AnyAsync(u =>
                 u.Username == request.Username ||
                 u.Email == request.Email);
@@ -30,7 +30,7 @@ namespace GameAPI.Services
             if (userExists)
                 return null;
 
-            // Stwórz nowego usera z zahaszowanym hasłem
+            // create new user with hashed password
             var user = new User
             {
                 Username = request.Username,
@@ -41,21 +41,21 @@ namespace GameAPI.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Zwróć token od razu po rejestracji
+            // return JWT token for the new user
             return GenerateToken(user);
         }
 
         public async Task<AuthResponse?> LoginAsync(LoginRequest request)
         {
-            // Znajdź usera po username
+            // find user by username
             var user = await _context.Users.FirstOrDefaultAsync(u =>
                 u.Username == request.Username);
 
-            // Sprawdź czy user istnieje i hasło się zgadza
+            // check if user exists and password is correct
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 return null;
 
-            // Zaktualizuj datę ostatniego logowania
+            // update last login time
             user.LastLoginAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
@@ -69,7 +69,7 @@ namespace GameAPI.Services
             var expirationHours = int.Parse(jwtSettings["ExpirationHours"]!);
             var expiresAt = DateTime.UtcNow.AddHours(expirationHours);
 
-            // Claims – dane zakodowane w tokenie (widoczne po zdekodowaniu)
+            // claims to include in the JWT token
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),

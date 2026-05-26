@@ -31,13 +31,13 @@ namespace GameAPI.Services
 
         public async Task<InventoryItemResponse?> AddItemAsync(int userId, AddItemRequest request)
         {
-            // Sprawdź czy gracz już ma ten przedmiot
+            // check if user already has this item
             var existingItem = await _context.InventoryItems
                 .FirstOrDefaultAsync(i => i.UserId == userId && i.ItemKey == request.ItemKey);
 
             if (existingItem != null)
             {
-                // Jeśli ma – zwiększ ilość
+                // if true – just update quantity
                 existingItem.Quantity += request.Quantity;
                 await _context.SaveChangesAsync();
 
@@ -51,7 +51,7 @@ namespace GameAPI.Services
                 };
             }
 
-            // Jeśli nie ma – dodaj nowy przedmiot
+            // if false – create new item
             var item = new InventoryItem
             {
                 UserId = userId,

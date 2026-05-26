@@ -17,7 +17,7 @@ namespace GameAPI.Controllers
             _leaderboardService = leaderboardService;
         }
 
-        // Publiczny endpoint – każdy może zobaczyć top scores
+        // Public endpoint – top scores
         [HttpGet("top")]
         public async Task<IActionResult> GetTopScores([FromQuery] int count = 10)
         {
@@ -25,7 +25,7 @@ namespace GameAPI.Controllers
             return Ok(scores);
         }
 
-        // Chroniony endpoint – tylko zalogowany gracz
+        // Secured endpoint - user scores
         [HttpGet("my-scores")]
         [Authorize]
         public async Task<IActionResult> GetMyScores()
@@ -35,7 +35,7 @@ namespace GameAPI.Controllers
             return Ok(scores);
         }
 
-        // Chroniony endpoint – dodaj wynik
+        // Secured endpoint - add score
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddScore(AddScoreRequest request)
@@ -45,7 +45,7 @@ namespace GameAPI.Controllers
             return Ok(entry);
         }
 
-        // Helper – wyciąga ID zalogowanego usera z tokenu JWT
+        // Helper method to extract user ID from JWT claims
         private int GetUserId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

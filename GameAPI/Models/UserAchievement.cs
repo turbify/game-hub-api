@@ -1,6 +1,6 @@
 ﻿namespace GameAPI.Models
 {
-    // Tabela łącząca – który user odblokował który achievement
+    // table to represent the many-to-many relationship between Users and Achievements
     public class UserAchievement
     {
         public int Id { get; set; }
