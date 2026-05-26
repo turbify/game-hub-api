@@ -8,13 +8,13 @@ namespace GameAPI.Validators
         public AddItemRequestValidator()
         {
             RuleFor(x => x.ItemKey)
-                .NotEmpty().WithMessage("ItemKey jest wymagany.")
-                .MaximumLength(100).WithMessage("ItemKey może mieć maksymalnie 100 znaków.")
-                .Matches("^[a-zA-Z0-9_]+$").WithMessage("ItemKey może zawierać tylko litery, cyfry i _");
+                .NotEmpty().WithMessage("ItemKey is required.")
+                .MaximumLength(100).WithMessage("An ItemKey can be up to 100 characters long.")
+                .Matches("^[a-zA-Z0-9_]+$").WithMessage("ItemKey can only contain letters, numbers, and _");
 
             RuleFor(x => x.Quantity)
-                .GreaterThan(0).WithMessage("Ilość musi być większa od 0.")
-                .LessThanOrEqualTo(9999).WithMessage("Ilość przekracza maksymalną wartość.");
+                .GreaterThan(0).WithMessage("The quantity must be greater than 0.")
+                .LessThanOrEqualTo(9999).WithMessage("The quantity exceeds the maximum limit.");
         }
     }
 
@@ -23,8 +23,8 @@ namespace GameAPI.Validators
         public UpdateItemRequestValidator()
         {
             RuleFor(x => x.Quantity)
-                .GreaterThan(0).WithMessage("Ilość musi być większa od 0.")
-                .LessThanOrEqualTo(9999).WithMessage("Ilość przekracza maksymalną wartość.");
+                .GreaterThan(0).WithMessage("The quantity must be greater than 0.")
+                .LessThanOrEqualTo(9999).WithMessage("The quantity exceeds the maximum limit.");
         }
     }
 }

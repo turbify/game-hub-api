@@ -44,7 +44,7 @@ namespace GameAPI.Controllers
             var result = await _achievementService.UnlockAchievementAsync(userId, achievementKey);
 
             if (result == null)
-                return BadRequest(new { message = "Achievement nie istnieje lub już odblokowany." });
+                return BadRequest(new { message = "The achievement does not exist or has already been unlocked." });
 
             return Ok(result);
         }
@@ -57,7 +57,7 @@ namespace GameAPI.Controllers
             var result = await _achievementService.CreateAchievementAsync(request);
 
             if (result == null)
-                return BadRequest(new { message = "Achievement z tym kluczem już istnieje." });
+                return BadRequest(new { message = "An achievement with this key already exists." });
 
             return Ok(result);
         }

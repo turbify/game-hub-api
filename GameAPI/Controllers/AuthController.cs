@@ -21,7 +21,7 @@ namespace GameAPI.Controllers
             var response = await _authService.RegisterAsync(request);
 
             if (response == null)
-                return BadRequest(new { message = "Username lub email już istnieje." });
+                return BadRequest(new { message = "That username or email address already exists." });
 
             return Ok(response);
         }
@@ -32,7 +32,7 @@ namespace GameAPI.Controllers
             var response = await _authService.LoginAsync(request);
 
             if (response == null)
-                return Unauthorized(new { message = "Nieprawidłowy login lub hasło." });
+                return Unauthorized(new { message = "Incorrect username or password." });
 
             return Ok(response);
         }

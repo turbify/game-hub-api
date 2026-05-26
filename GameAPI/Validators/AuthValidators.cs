@@ -8,20 +8,20 @@ namespace GameAPI.Validators
         public RegisterRequestValidator()
         {
             RuleFor(x => x.Username)
-                .NotEmpty().WithMessage("Username jest wymagany.")
-                .MinimumLength(3).WithMessage("Username musi mieć minimum 3 znaki.")
-                .MaximumLength(50).WithMessage("Username może mieć maksymalnie 50 znaków.")
-                .Matches("^[a-zA-Z0-9_]+$").WithMessage("Username może zawierać tylko litery, cyfry i _");
+                .NotEmpty().WithMessage("A username is required.")
+                .MinimumLength(3).WithMessage("The username must be at least 3 characters long.")
+                .MaximumLength(50).WithMessage("A username can be up to 50 characters long.")
+                .Matches("^[a-zA-Z0-9_]+$").WithMessage("A username can only contain letters, numbers, and _");
 
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email jest wymagany.")
-                .EmailAddress().WithMessage("Nieprawidłowy format email.");
+                .NotEmpty().WithMessage("An email address is required.")
+                .EmailAddress().WithMessage("Invalid email format.");
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Hasło jest wymagane.")
-                .MinimumLength(8).WithMessage("Hasło musi mieć minimum 8 znaków.")
-                .Matches("[A-Z]").WithMessage("Hasło musi zawierać przynajmniej jedną wielką literę.")
-                .Matches("[0-9]").WithMessage("Hasło musi zawierać przynajmniej jedną cyfrę.");
+                .NotEmpty().WithMessage("A password is required.")
+                .MinimumLength(8).WithMessage("The password must be at least 8 characters long.")
+                .Matches("[A-Z]").WithMessage("The password must contain at least one uppercase letter.")
+                .Matches("[0-9]").WithMessage("The password must contain at least one number.");
         }
     }
 
@@ -30,10 +30,10 @@ namespace GameAPI.Validators
         public LoginRequestValidator()
         {
             RuleFor(x => x.Username)
-                .NotEmpty().WithMessage("Username jest wymagany.");
+                .NotEmpty().WithMessage("A username is required.");
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Hasło jest wymagane.");
+                .NotEmpty().WithMessage("A password is required.");
         }
     }
 }

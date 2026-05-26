@@ -8,15 +8,15 @@ namespace GameAPI.Validators
         public SaveGameRequestValidator()
         {
             RuleFor(x => x.SaveData)
-                .NotEmpty().WithMessage("Dane zapisu są wymagane.")
-                .MaximumLength(100000).WithMessage("Dane zapisu są zbyt duże.");
+                .NotEmpty().WithMessage("This information is required.")
+                .MaximumLength(100000).WithMessage("The log data is too large.");
 
             RuleFor(x => x.CurrentLevel)
-                .GreaterThanOrEqualTo(1).WithMessage("Level musi być większy od 0.")
-                .LessThanOrEqualTo(9999).WithMessage("Level przekracza maksymalną wartość.");
+                .GreaterThanOrEqualTo(1).WithMessage("The level must be greater than 0.")
+                .LessThanOrEqualTo(9999).WithMessage("The level exceeds the maximum value.");
 
             RuleFor(x => x.CurrentScore)
-                .GreaterThanOrEqualTo(0).WithMessage("Score nie może być ujemny.");
+                .GreaterThanOrEqualTo(0).WithMessage("The score cannot be negative.");
         }
     }
 }

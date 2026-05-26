@@ -25,7 +25,7 @@ namespace GameAPI.Controllers
             var save = await _saveService.GetSaveAsync(userId);
 
             if (save == null)
-                return NotFound(new { message = "Brak zapisu gry." });
+                return NotFound(new { message = "Missing game save." });
 
             return Ok(save);
         }
@@ -45,9 +45,9 @@ namespace GameAPI.Controllers
             var success = await _saveService.DeleteSaveAsync(userId);
 
             if (!success)
-                return NotFound(new { message = "Brak zapisu gry." });
+                return NotFound(new { message = "Missing game save." });
 
-            return Ok(new { message = "Zapis usunięty." });
+            return Ok(new { message = "Game save deleted." });
         }
 
         private int GetUserId()

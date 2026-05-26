@@ -8,12 +8,12 @@ namespace GameAPI.Validators
         public AddScoreRequestValidator()
         {
             RuleFor(x => x.Score)
-                .GreaterThanOrEqualTo(0).WithMessage("Score nie może być ujemny.")
-                .LessThanOrEqualTo(9999999).WithMessage("Score przekracza maksymalną wartość.");
+                .GreaterThanOrEqualTo(0).WithMessage("The score cannot be negative.")
+                .LessThanOrEqualTo(9999999).WithMessage("The score exceeds the maximum value.");
 
             RuleFor(x => x.Level)
-                .GreaterThanOrEqualTo(1).WithMessage("Level musi być większy od 0.")
-                .LessThanOrEqualTo(9999).WithMessage("Level przekracza maksymalną wartość.");
+                .GreaterThanOrEqualTo(1).WithMessage("The level must be greater than 0.")
+                .LessThanOrEqualTo(9999).WithMessage("The level exceeds the maximum value.");
         }
     }
 }

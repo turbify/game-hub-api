@@ -41,7 +41,7 @@ namespace GameAPI.Controllers
             var item = await _inventoryService.UpdateItemAsync(userId, itemId, request);
 
             if (item == null)
-                return NotFound(new { message = "Przedmiot nie istnieje lub nie należy do Ciebie." });
+                return NotFound(new { message = "The item does not exist or does not belong to you." });
 
             return Ok(item);
         }
@@ -53,9 +53,9 @@ namespace GameAPI.Controllers
             var success = await _inventoryService.RemoveItemAsync(userId, itemId);
 
             if (!success)
-                return NotFound(new { message = "Przedmiot nie istnieje lub nie należy do Ciebie." });
+                return NotFound(new { message = "The item does not exist or does not belong to you." });
 
-            return Ok(new { message = "Przedmiot usunięty." });
+            return Ok(new { message = "Item deleted." });
         }
 
         private int GetUserId()
