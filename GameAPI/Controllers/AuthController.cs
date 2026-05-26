@@ -1,6 +1,7 @@
 ﻿using GameAPI.DTOs;
 using GameAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GameAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace GameAPI.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
             var response = await _authService.RegisterAsync(request);
@@ -27,6 +29,7 @@ namespace GameAPI.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
             var response = await _authService.LoginAsync(request);

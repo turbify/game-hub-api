@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 // serilog configuration
 Log.Logger = new LoggerConfiguration()
@@ -104,9 +106,60 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            message = "Zbyt wiele requestów. Spróbuj ponownie za chwilę."
+        }, cancellationToken);
+    };
+
+    // Limit dla logowania – ochrona przed brute force
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.PermitLimit = 5;                           // 5 tries
+        opt.Window = TimeSpan.FromMinutes(1);          // per minute
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;                            // no queue, reject immediately after limit is reached
+    });
+
+    // Limit dla rejestracji
+    options.AddFixedWindowLimiter("register", opt =>
+    {
+        opt.PermitLimit = 3;                           // 3 registrations
+        opt.Window = TimeSpan.FromMinutes(1);          // per minute
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+
+    // Limit dla zapisu gry
+    options.AddFixedWindowLimiter("save", opt =>
+    {
+        opt.PermitLimit = 30;                          // 30 saves
+        opt.Window = TimeSpan.FromMinutes(1);          // per minute
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+
+    // Limit globalny dla wszystkich endpointów
+    options.AddFixedWindowLimiter("global", opt =>
+    {
+        opt.PermitLimit = 100;                         // 100 requests
+        opt.Window = TimeSpan.FromMinutes(1);          // per minute
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {

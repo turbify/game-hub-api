@@ -2,6 +2,7 @@
 using GameAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace GameAPI.Controllers
@@ -9,6 +10,7 @@ namespace GameAPI.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [EnableRateLimiting("global")]
     public class InventoryController : ControllerBase
     {
         private readonly InventoryService _inventoryService;

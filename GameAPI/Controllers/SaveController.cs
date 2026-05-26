@@ -2,6 +2,7 @@
 using GameAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace GameAPI.Controllers
@@ -31,6 +32,7 @@ namespace GameAPI.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting("save")]
         public async Task<IActionResult> SaveGame(SaveGameRequest request)
         {
             var userId = GetUserId();

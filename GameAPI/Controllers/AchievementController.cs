@@ -2,12 +2,14 @@
 using GameAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace GameAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("global")]
     public class AchievementController : ControllerBase
     {
         private readonly AchievementService _achievementService;
