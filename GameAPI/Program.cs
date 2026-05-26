@@ -1,165 +1,30 @@
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using GameAPI.Data;
+using GameAPI.Extensions;
 using GameAPI.Middleware;
-using GameAPI.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
-using System.Text;
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 
-// serilog configuration
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File(
         path: "logs/gameapi-.log",
-        rollingInterval: RollingInterval.Day,    // new file every day
-        retainedFileCountLimit: 7,               // keep logs for 7 days
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
     )
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// use serilog for logging instead of default logger
 builder.Host.UseSerilog();
-
-// controllers 
 builder.Services.AddControllers();
-
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
-// entity Framework - database connection
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// auth
-builder.Services.AddScoped<AuthService>();
-
-// leaderboard
-builder.Services.AddScoped<LeaderboardService>();
-
-// inventoyr
-builder.Services.AddScoped<InventoryService>();
-
-// save
-builder.Services.AddScoped<SaveService>();
-
-// achievements
-builder.Services.AddScoped<AchievementService>();
-
-// JWT authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"]!;
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-    };
-});
-
-// swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter: Bearer {token}"
-    });
-
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-// Rate Limiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.OnRejected = async (context, cancellationToken) =>
-    {
-        context.HttpContext.Response.StatusCode = 429;
-        await context.HttpContext.Response.WriteAsJsonAsync(new
-        {
-            message = "Zbyt wiele requestów. Spróbuj ponownie za chwilę."
-        }, cancellationToken);
-    };
-
-    // Limit dla logowania – ochrona przed brute force
-    options.AddFixedWindowLimiter("login", opt =>
-    {
-        opt.PermitLimit = 5;                           // 5 tries
-        opt.Window = TimeSpan.FromMinutes(1);          // per minute
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;                            // no queue, reject immediately after limit is reached
-    });
-
-    // Limit dla rejestracji
-    options.AddFixedWindowLimiter("register", opt =>
-    {
-        opt.PermitLimit = 3;                           // 3 registrations
-        opt.Window = TimeSpan.FromMinutes(1);          // per minute
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
-
-    // Limit dla zapisu gry
-    options.AddFixedWindowLimiter("save", opt =>
-    {
-        opt.PermitLimit = 30;                          // 30 saves
-        opt.Window = TimeSpan.FromMinutes(1);          // per minute
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
-
-    // Limit globalny dla wszystkich endpointów
-    options.AddFixedWindowLimiter("global", opt =>
-    {
-        opt.PermitLimit = 100;                         // 100 requests
-        opt.Window = TimeSpan.FromMinutes(1);          // per minute
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
-});
+builder.Services.AddDatabase(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSwaggerWithJwt();
+builder.Services.AddGameRateLimiting();
+builder.Services.AddGameServices();
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {
@@ -168,6 +33,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
