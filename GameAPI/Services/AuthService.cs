@@ -13,11 +13,13 @@ namespace GameAPI.Services
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(AppDbContext context, IConfiguration configuration)
+        public AuthService(AppDbContext context, IConfiguration configuration, ILogger<AuthService> logger)
         {
             _context = context;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
@@ -28,7 +30,10 @@ namespace GameAPI.Services
                 u.Email == request.Email);
 
             if (userExists)
+            {
+                _logger.LogWarning("Attempt to register with a username or email address that is already taken: {Username}", request.Username);
                 return null;
+            }
 
             // create new user with hashed password
             var user = new User
@@ -42,6 +47,7 @@ namespace GameAPI.Services
             await _context.SaveChangesAsync();
 
             // return JWT token for the new user
+            _logger.LogInformation("New player registered: {Username}", request.Username);
             return GenerateToken(user);
         }
 
@@ -53,12 +59,16 @@ namespace GameAPI.Services
 
             // check if user exists and password is correct
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                _logger.LogWarning("Failed login attempt: {Username}", request.Username);
                 return null;
+            }
 
             // update last login time
             user.LastLoginAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Player logged in: {Username}", request.Username);
             return GenerateToken(user);
         }
 

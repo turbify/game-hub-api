@@ -1,15 +1,30 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using GameAPI.Data;
+using GameAPI.Middleware;
 using GameAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using GameAPI.Middleware;
+using Serilog;
 using System.Text;
 
+// serilog configuration
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "logs/gameapi-.log",
+        rollingInterval: RollingInterval.Day,    // new file every day
+        retainedFileCountLimit: 7,               // keep logs for 7 days
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// use serilog for logging instead of default logger
+builder.Host.UseSerilog();
 
 // controllers 
 builder.Services.AddControllers();
